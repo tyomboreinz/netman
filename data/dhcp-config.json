@@ -1,0 +1,88 @@
+[{
+    "model": "ipam.dhcp_config", 
+    "pk": 1, 
+    "fields": {
+        "config": "default_lease_time", 
+        "value": "300"
+    }
+}, 
+{
+    "model": "ipam.dhcp_config", 
+    "pk": 2, 
+    "fields": {
+        "config": "max_lease_time", 
+        "value": "7200"
+    }
+}, 
+{
+    "model": "ipam.dhcp_config", 
+    "pk": 3, 
+    "fields": {
+        "config": "subnet", 
+        "value": "10.10.10.0"
+    }
+}, 
+{
+    "model": "ipam.dhcp_config", 
+    "pk": 4, 
+    "fields": {
+        "config": "netmask", 
+        "value": "255.255.255.0"
+        }
+}, 
+{
+    "model": "ipam.dhcp_config", 
+    "pk": 5, 
+    "fields": {
+        "config": "dhcp_start", 
+        "value": "10.10.10.25"
+        }
+}, 
+{
+    "model": "ipam.dhcp_config", 
+    "pk": 6, 
+    "fields": {
+        "config": "dhcp_end", 
+        "value": "10.10.10.100"
+    }
+}, 
+{
+    "model": "ipam.dhcp_config", 
+    "pk": 7, 
+    "fields": {
+        "config": "gateway", 
+        "value": "10.10.10.1"
+    }
+}, 
+{
+    "model": "ipam.dhcp_config", 
+    "pk": 8, 
+    "fields": {
+        "config": "dns1", 
+        "value": "8.8.8.8"
+        }
+}, 
+{
+    "model": "ipam.dhcp_config", 
+    "pk": 9, 
+    "fields": {
+        "config": "dns2", 
+        "value": "8.8.4.4"
+        }
+}, 
+{
+    "model": "ipam.dhcp_config", 
+    "pk": 10, 
+    "fields": {
+        "config": "domain", 
+        "value": "tyo.com"
+    }
+}, 
+{
+    "model": "ipam.dhcp_config", 
+    "pk": 11, 
+    "fields": {
+        "config": "interface", 
+        "value": "enp0s9"
+        }
+}]
