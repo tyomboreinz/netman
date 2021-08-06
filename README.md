@@ -27,8 +27,20 @@ Then insert default configuration of dhcp server
 python3 manage.py loaddata data/dhcp-config.json
 ```
 
+insert user dan password
+
+```bash
+python3 manage.py shell -c "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'password')"
+```
+
 ## Run Application
 
 ```bash
 python3 manage.py runserver 0.0.0.0:8080
 ```
+
+## Roadmap
+
+- IP Address Management
+- DHCP Server Management
+- DNS Management
