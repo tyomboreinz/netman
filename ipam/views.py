@@ -241,6 +241,7 @@ def ip_add(request):
         form = FormIpAddress()
         data = {
             'form' : form,
+            'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
             'title' : 'Add IP',
         }
     return render(request, 'item-add.html', data)

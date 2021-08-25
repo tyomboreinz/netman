@@ -6,7 +6,7 @@ IP Address Management and DHCP Server
 
 Ubuntu / Debian
 
-Package **isc-dhcp-server** already installed
+Package **isc-dhcp-server** and **nmap** already installed
 
 Python 3.9.5
 
