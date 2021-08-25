@@ -38,7 +38,7 @@
                     {% for config in dhcp_config %}
                     <tr>
                         <td class="text-center text-muted">{{ forloop.counter }}</td>
-                        <td class="text-center">{{ config.config  }}</td>
+                        <td class="text-center">{{ config.config|upper  }}</td>
                         <td class="text-center">{{ config.value }}</td>
                         <td class="text-center">
                             <a href="{% url 'dhcp_config_edit' config.id%}" class="btn btn-primary btn-sm">Edit</a>

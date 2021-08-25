@@ -58,6 +58,35 @@ class FormDHCP_Static(ModelForm):
             'description': forms.TextInput({'class':'form-control ps-0 form-control-line'}),
         }
 
+class FormApplication(ModelForm):
+    class Meta:
+        model = Application
+        fields = '__all__'
+
+        widgets = {
+            'name': forms.TextInput({'class':'form-control'}),
+            'port': forms.TextInput({'class':'form-control'}),
+            'ip': forms.Select({'class':'form-control'}),
+            'description': forms.TextInput({'class':'form-control'}),
+        }
+
+class FormConfigs(ModelForm):
+    class Meta:
+        model = ConfigPortal
+        fields = ['value']
+        widgets = {
+            'value' : forms.TextInput({'class':'form-control'})
+        }
+
+class FormOS(ModelForm):
+    class Meta:
+        model = OS
+        fields = '__all__'
+
+        widgets = {
+            'name': forms.TextInput({'class':'form-control', 'placeholder':'Press Enter to add OS'}),
+        }
+
 class LoginForm(AuthenticationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'Enter Username Here ...'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control', 'placeholder':'Enter Password Here ...'}))

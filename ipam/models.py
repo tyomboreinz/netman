@@ -1,7 +1,5 @@
 from django.db import models
 
-# Create your models here.
-
 class Subnet(models.Model):
     netmask = models.CharField(max_length=15)
     ip_network = models.CharField(max_length=15)
@@ -48,3 +46,21 @@ class Dhcp_static(models.Model):
 
     def __str__(self):
         return self.name
+
+class Application(models.Model):
+    name = models.CharField(max_length=20)
+    ip = models.ForeignKey(Ip_address, on_delete=models.CASCADE)
+    port = models.IntegerField()
+    description = models.TextField()
+    image = models.ImageField(upload_to='app/', null=True)
+    create_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+class ConfigPortal(models.Model):
+    config = models.CharField(max_length=25)
+    value = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.value

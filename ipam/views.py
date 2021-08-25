@@ -1,20 +1,107 @@
 from ipam.network import Network
-import subprocess
 from django.shortcuts import render, redirect
 from django.db.models.functions import Length
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from ipam.models import *
 from ipam.forms import *
+import datetime, random
 
-sidebar_subnets = Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network')
+@login_required(login_url=settings.LOGIN_URL)
+def os_delete(request, id_os):
+    os = OS.objects.get(id=id_os)
+    os.delete()
+    return redirect('/setting')
+
+@login_required(login_url=settings.LOGIN_URL)
+def setting_os(request):
+    if request.POST:
+        form = FormOS(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('/setting')
+    else:
+        form = FormOS()
+        data = {
+            'menu_config' : 'class=mm-active',
+            'form' : form,
+            'os_data' : OS.objects.all().order_by('name'),
+            'configs' : ConfigPortal.objects.all().order_by('config'),
+            'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+            }
+    return render(request, 'setting.html', data)
+
+@login_required(login_url=settings.LOGIN_URL)
+def config_edit(request, id_config):
+    set = ConfigPortal.objects.get(id=id_config)
+    if request.POST:
+        form = FormConfigs(request.POST, instance=set)
+        if form.is_valid():
+            form.save()
+            return redirect('/config/portal')
+    else:
+        form = FormConfigs(instance=set)
+        data = {
+            'form' : form,
+        }
+    return render(request, 'item-edit.html', data)
+
+@login_required(login_url=settings.LOGIN_URL)
+def application_delete(request, id_app):
+    app = Application.objects.get(id=id_app)
+    if app.image:
+        app.image.delete()
+    app.delete()
+    return redirect('applications')
+
+@login_required(login_url=settings.LOGIN_URL)
+def application_edit(request, id_app):
+    app = Application.objects.get(id=id_app)
+    if request.POST:
+        post_value = request.FILES.copy()
+        if post_value:
+            app.image.delete()
+        form = FormApplication(request.POST, request.FILES, instance=app)
+        if form.is_valid():
+            form.save()
+            return redirect('applications')
+    else:
+        form = FormApplication(instance=app)
+        data = {
+            'form' : form,
+        }
+    return render(request, 'item-edit.html', data)
+
+@login_required(login_url=settings.LOGIN_URL)
+def application_add(request):
+    if request.POST:
+        form = FormApplication(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('applications')
+    else:
+        form = FormApplication()
+        data = {
+            'form' : form,
+        }
+    return render(request, 'item-add.html', data)
+
+@login_required(login_url=settings.LOGIN_URL)
+def applications(request):
+    data = {
+        'app_list' : Application.objects.all(),
+        'menu_app' : 'class=mm-active',
+        'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+    }
+    return render(request, 'applications.html', data)
 
 @login_required(login_url=settings.LOGIN_URL)
 def dhcp_lease(request):
-
     data = {
         'dhcp_lease': Network.get_dhcp_lease(),
-        'sidebar_subnets' : sidebar_subnets,
+        'menu_dhcp_lease' : 'class=mm-active',
+        'menu_dhcp_client' : 'class=mm-active',
+        'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
     }
     return render(request, 'dhcp-lease.html', data)
 
@@ -62,7 +149,9 @@ def dhcp_static_lease(request):
     dhcp_static = Dhcp_static.objects.all().order_by(Length('ip').asc(), 'ip')
     data = {
         'dhcp_static': dhcp_static,
-        'sidebar_subnets' : sidebar_subnets,
+        'menu_dhcp_lease' : 'class=mm-active',
+        'menu_dhcp_static' : 'class=mm-active',
+        'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
     }
     return render(request, 'dhcp-static-lease.html', data)
 
@@ -107,7 +196,8 @@ def dhcp_config_list(request):
     dhcp_config = Dhcp_Config.objects.all()
     data = {
         'dhcp_config' : dhcp_config,
-        'sidebar_subnets' : sidebar_subnets,
+        'menu_dhcp' : 'class=mm-active',
+        'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
     }
     return render(request, 'dhcp-config.html', data)
 
@@ -170,24 +260,24 @@ def network_edit(request, id_subnet):
             form.save()
             return redirect('/network')
     else:
-        # sidebar_subnets = Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network')       #sidebar avaiable network
         form = FormSubnet(instance=subnet)
         data = {
             'form' : form,
             'subnet' : subnet,
-            'sidebar_subnets' : sidebar_subnets,
+            'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
             'title' : 'Edit Network',
         }
     return render(request, 'item-edit.html', data)
 
 @login_required(login_url=settings.LOGIN_URL)
 def network_detail(request, id_subnet):
-    # sidebar_subnets = Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network')       #sidebar avaiable network
     ips = Ip_address.objects.filter(subnet=id_subnet).order_by(Length('ip_address').asc(), 'ip_address')
     data = {
-        'sidebar_subnets' : sidebar_subnets,
+        'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
         'id_subnet' : id_subnet,
         'ips' : ips,
+        'menu_network_detail' : 'class=mm-active',
+        'menu_network_' : 'class=mm-active',
     }
     return render(request, 'network-detail.html', data)
 
@@ -199,12 +289,14 @@ def network_add(request):
             form.save()
             return redirect('/network/')
     else:
-        # sidebar_subnets = Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network')   #sidebar avaiable network
         form = FormSubnet()
         data = {
             'form' : form,
-            'sidebar_subnets' : sidebar_subnets,
+            'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
             'title' : 'Add Network',
+            'menu_network_aria' : 'mm-collapse mm-show',
+            'menu_network_add' : 'class=mm-active',
+            'menu_network' : 'class=mm-active',
         }
     return render(request, 'item-add.html', data)
 
@@ -214,6 +306,9 @@ def network_list(request):
     data = {
         'subnets' : subnets,
         'sidebar_subnets' : subnets,
+        'menu_network_aria' : 'mm-collapse mm-show',
+        'menu_network_list' : 'class=mm-active',
+        'menu_network' : 'class=mm-active',
     }
     return render(request, 'network-list.html', data)
 
@@ -238,9 +333,37 @@ def network_scan(request, id_subnet):
     return redirect('/network/'+ str(id_subnet))
 
 @login_required(login_url=settings.LOGIN_URL)
-def home(request):
-    # sidebar_subnets = Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network')       #sidebar avaiable network
+def dashboard(request):
+    os = OS.objects.all().order_by('name')
+    total_ip = Ip_address.objects.all().count()
+    total_subnet = Subnet.objects.all().count()
+    color = ['primary', 'success', 'warning', 'danger']
+    data_os = []
+    for data in os:
+        count_data = Ip_address.objects.filter(os_id=data.id).count()
+        if count_data != 0:
+            data_os.append({'name' : data.name, 'count' : count_data, 'percentage' : format(count_data / total_ip * 100, ".0f"), 'color' : random.choice(color)})
+
     data = {
-        'sidebar_subnets' : sidebar_subnets,
+        'total_subnet' : total_subnet,
+        'total_ip' : total_ip,
+        'data_os' : data_os,
+        'menu_dashboard' : 'class=mm-active',
+        'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
     }
     return render(request, 'dashboard.html', data)
+
+def home(request):
+    now = datetime.datetime.now()
+    data = {
+        'company_name' : ConfigPortal.objects.get(config='company_name'),
+        'company_short_name' : ConfigPortal.objects.get(config='company_short_name'),
+        'company_address' : ConfigPortal.objects.get(config='company_address'),
+        'company_telp' : ConfigPortal.objects.get(config='company_telp'),
+        'company_email' : ConfigPortal.objects.get(config='company_email'),
+        'company_website' : ConfigPortal.objects.get(config='company_website'),
+        'app_name' : ConfigPortal.objects.get(config='app_name'),
+        'app_list' : Application.objects.all(),
+        'year' : now.year
+    }
+    return render(request, 'portal.html', data)
