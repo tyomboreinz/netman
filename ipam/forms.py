@@ -16,8 +16,8 @@ class FormIpAddress(ModelForm):
 
         widgets = {
             'ip_address': forms.TextInput({'class':'form-control input-mask-trigger','data-inputmask':"'alias':'ip'"}),
-            'hostname': forms.TextInput({'class':'form-control ps-0 form-control-line'}),
-            'description': forms.TextInput({'class':'form-control ps-0 form-control-line'}),
+            'hostname': forms.TextInput({'class':'form-control'}),
+            'description': forms.TextInput({'class':'form-control'}),
             'subnet': forms.Select({'class':'form-control'}),
             'os': forms.Select(choices=list_choices,attrs={'class':'form-control'}),
             'username': forms.TextInput({'class':'form-control'}),
@@ -31,10 +31,10 @@ class FormSubnet(ModelForm):
         fields = '__all__'
 
         widgets = {
-            'netmask': forms.NumberInput({'class':'form-control ps-0 form-control-line'}),
+            'netmask': forms.NumberInput({'class':'form-control'}),
             'ip_network': forms.TextInput({'class':'form-control input-mask-trigger','data-inputmask':"'alias':'ip'"}),
             'ip_broadcast': forms.TextInput({'class':'form-control input-mask-trigger','data-inputmask':"'alias':'ip'"}),
-            'description': forms.TextInput({'class':'form-control ps-0 form-control-line'}),
+            'description': forms.TextInput({'class':'form-control'}),
         }
 
 class FormDHCP(ModelForm):
@@ -56,16 +56,20 @@ class FormDHCP_Static(ModelForm):
             'name': forms.TextInput({'class':'form-control'}),
             'mac': forms.TextInput({'class':'form-control'}),
             'ip': forms.TextInput({'class':'form-control input-mask-trigger','data-inputmask':"'alias':'ip'"}),
-            'description': forms.TextInput({'class':'form-control ps-0 form-control-line'}),
+            'description': forms.TextInput({'class':'form-control'}),
         }
 
 class FormApplication(ModelForm):
     class Meta:
         model = Application
         fields = '__all__'
+        list_choices = (
+            ('http', 'http'),
+            ('https', 'https'), )
 
         widgets = {
             'name': forms.TextInput({'class':'form-control'}),
+            'protocol': forms.Select(choices=list_choices,attrs={'class':'form-control'}),
             'port': forms.TextInput({'class':'form-control'}),
             'ip': forms.Select({'class':'form-control'}),
             'description': forms.TextInput({'class':'form-control'}),

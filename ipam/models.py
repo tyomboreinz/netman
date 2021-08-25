@@ -45,6 +45,7 @@ class Dhcp_static(models.Model):
 
 class Application(models.Model):
     name = models.CharField(max_length=20)
+    protocol = models.CharField(max_length=5)
     ip = models.ForeignKey(Ip_address, on_delete=models.CASCADE)
     port = models.IntegerField()
     description = models.TextField()
