@@ -21,7 +21,8 @@ class FormIpAddress(ModelForm):
             'subnet': forms.Select({'class':'form-control'}),
             'os': forms.Select(choices=list_choices,attrs={'class':'form-control'}),
             'username': forms.TextInput({'class':'form-control'}),
-            'password': forms.PasswordInput({'class':'form-control','data-toggle':'password'}),
+            'password': forms.TextInput({'class':'form-control','data-toggle':'password'}),
+            # 'password': forms.PasswordInput({'class':'form-control','data-toggle':'password'}),
         }
 
 class FormSubnet(ModelForm):

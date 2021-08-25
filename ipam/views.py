@@ -1,3 +1,4 @@
+from django.db.models.functions.text import Upper
 from ipam.network import Network
 from django.shortcuts import render, redirect
 from django.db.models.functions import Length
@@ -38,11 +39,12 @@ def config_edit(request, id_config):
         form = FormConfigs(request.POST, instance=set)
         if form.is_valid():
             form.save()
-            return redirect('/config/portal')
+            return redirect('/setting')
     else:
         form = FormConfigs(instance=set)
         data = {
             'form' : form,
+            'title' : 'Edit Config Portal - ' + str(set.config).upper()
         }
     return render(request, 'item-edit.html', data)
 
@@ -69,6 +71,7 @@ def application_edit(request, id_app):
         form = FormApplication(instance=app)
         data = {
             'form' : form,
+            'title' : 'Edit App',
         }
     return render(request, 'item-edit.html', data)
 
@@ -83,6 +86,7 @@ def application_add(request):
         form = FormApplication()
         data = {
             'form' : form,
+            'title' : 'Add App',
         }
     return render(request, 'item-add.html', data)
 
@@ -211,17 +215,18 @@ def ip_delete(request, id_ip):
 def ip_edit(request, id_ip):
     ip = Ip_address.objects.get(id=id_ip)
     if request.POST:
-        form = FormIpAddress(request.POST, instance=ip)
+        post_value = request.POST.copy()
+        post_value['subnet'] = ip.subnet
+        form = FormIpAddress(post_value, instance=ip)
         if form.is_valid():
             subnet = Subnet.objects.get(ip_network=form.cleaned_data['subnet'])
             form.save()
             return redirect('/network/' + str(subnet.id))
     else:
         form = FormIpAddress(instance=ip)
-        #form.fields['subnet'].widget = forms.HiddenInput()
-        #form.fields['subnet'].widget.attrs['disabled'] = True
-        form.fields['subnet'].widget.attrs['readonly'] = True
-        #form.fields['subnet'].disabled = True
+        # form.fields['subnet'].widget = forms.TextInput({'class':'form-control'})
+        form.fields['subnet'].widget = forms.HiddenInput()
+        # form.fields['subnet'].disabled = True
         data = {
             'form' : form,
             'ip' : ip,
@@ -363,7 +368,7 @@ def home(request):
         'company_telp' : ConfigPortal.objects.get(config='company_telp'),
         'company_email' : ConfigPortal.objects.get(config='company_email'),
         'company_website' : ConfigPortal.objects.get(config='company_website'),
-        'app_name' : ConfigPortal.objects.get(config='app_name'),
+        'app_name' : ConfigPortal.objects.get(config='portal_name'),
         'app_list' : Application.objects.all(),
         'year' : now.year
     }
