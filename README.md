@@ -24,7 +24,7 @@ python3 manage.py migrate
 Then insert default configuration of dhcp server
 
 ```bash
-python3 manage.py loaddata data/dhcp-config.json
+python3 manage.py loaddata data/*.json
 ```
 
 insert user dan password
