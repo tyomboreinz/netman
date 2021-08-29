@@ -316,6 +316,9 @@ def dhcp_config_edit(request,id_setting):
             return redirect('/dhcp/config')
     else:
         form = FormDHCP(instance=dhcp)
+        if dhcp.config == "interface":
+            form.fields['value'].widget = forms.Select(choices=Network.get_interface_list(),attrs={'class':'form-control'})
+            
         data = {
             'form' : form,
             'dhcp' : dhcp,
@@ -480,7 +483,6 @@ def network_scan(request, id_subnet):
 def dashboard(request):
     os = OS.objects.all().annotate(count_os=Count('ip_address')).order_by('-count_os')
     total_ip = Ip_address.objects.all().count()
-    total_subnet = Subnet.objects.all().count()
     color = ['primary', 'success', 'warning', 'danger']
     data_os = []
     for data in os:
@@ -489,8 +491,11 @@ def dashboard(request):
             data_os.append({'name' : data.name, 'count' : count_data, 'percentage' : format(count_data / total_ip * 100, ".0f"), 'color' : random.choice(color)})
 
     data = {
-        'total_subnet' : total_subnet,
+        'total_subnet' : Subnet.objects.all().count(),
         'total_ip' : total_ip,
+        'total_domain' : Domain.objects.all().count(),
+        'total_subdomain' : SubDomain.objects.all().count(),
+        'total_app' : Application.objects.all().count(),
         'data_os' : data_os,
         'menu_dashboard' : 'class=mm-active',
         'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),

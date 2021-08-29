@@ -3,10 +3,14 @@ import subprocess, os
 class Network():
 
     def get_interface_list():
-        x = subprocess.check_output("ifconfig | grep UP | awk '{print $1}' | tr -d ':'", shell=True)
+        x = subprocess.check_output("ifconfig | grep UP | grep -v br | grep -v docker | grep -v lo | awk '{print $1}' | tr -d ':'", shell=True)
         x_decode = x.decode("utf-8")
         interface_list = list(filter(None,(x_decode.split("\n"))))
-        return interface_list
+        interface = ()
+        for iface in interface_list:
+            ether = (iface, iface)
+            interface += (ether,)
+        return interface
 
     def get_dhcp_lease():
         x = subprocess.check_output("dhcp-lease-list | sed -n '/=======/,$p' | grep -v '=========' | awk '{print $0}'", shell=True)
