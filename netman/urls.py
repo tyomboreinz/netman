@@ -41,6 +41,18 @@ urlpatterns = [
 
     path('setting/', setting_os, name='setting'),
     path('os/delete/<int:id_os>', os_delete, name='os_delete'),
+
+    path('domain', domain_list, name='domain_list'),
+    path('domain/add', domain_add, name='domain_add'),
+    path('domain/edit/<int:id_domain>', domain_edit, name='domain_edit'),
+    path('domain/delete/<int:id_domain>', domain_delete, name='domain_delete'),
+
+    path('domain/<int:id_subdomain>', subdomain, name='domain'),
+    path('domain/apply/<int:id_domain>', subdomain_apply, name='domain_apply'),
+
+    path('subdomain/add', subdomain_add, name='subdomain_add'),
+    path('subdomain/edit/<int:id_subdomain>', subdomain_edit, name='subdomain_edit'),
+    path('subdomain/delete/<int:id_subdomain>', subdomain_delete, name='subdomain_delete'),
 ]
 
 if settings.DEBUG:

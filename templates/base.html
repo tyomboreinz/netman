@@ -137,7 +137,7 @@
                         </button>
                     </span>
                 </div>
-                <div class="scrollbar-sidebar">
+                <div class="scrollbar-sidebar ps ps--active-y">
                     <div class="app-sidebar__inner">
                         <ul class="vertical-nav-menu">
                             <li class="app-sidebar__heading">Menu</li>
@@ -147,14 +147,9 @@
 
                             <li class="app-sidebar__heading">Network</li>
                             <li {{ menu_network }}>
-                                <a href="#">
-                                    <i class="metismenu-icon pe-7s-play"></i> Action
-                                    <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
+                                <a href="{% url 'network_list' %}">
+                                    <i class="metismenu-icon pe-7s-menu"></i> List Network
                                 </a>
-                                <ul class="{{menu_network_aria}}">
-                                    <li><a href="{% url 'network_add' %}" {{ menu_network_add }}><i class="metismenu-icon"></i> Add Network</a></li>
-                                    <li><a href="{% url 'network_list' %}" {{ menu_network_list }}><i class="metismenu-icon"></i> List Network</a></li>
-                                </ul>
                             </li>
                             <li {{ menu_network_ }}>
                                 <a href="#">
@@ -171,6 +166,29 @@
                                     {% endfor %}
                                 </ul>
                             </li>
+
+                            <li class="app-sidebar__heading">Domain</li>
+                            <li {{ menu_domain }}>
+                                <a href="{% url 'domain_list' %}">
+                                    <i class="metismenu-icon pe-7s-edit"></i> List Domain
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#">
+                                    <i class="metismenu-icon pe-7s-global"></i> Avaiable Domain
+                                    <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
+                                </a>
+                                <ul>
+                                    {% for domain in sidebar_domains %}
+                                        <li>
+                                            <a href="{% url 'domain' domain.id%}">
+                                                <i class="metismenu-icon"></i> {{ domain.name }}
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+
                             <li class="app-sidebar__heading">DHCP Server</li>
                             <li {{menu_dhcp}}> <a href="{% url 'dhcp_config_list' %}"> <i class="metismenu-icon pe-7s-tools"></i> Config </a></li>
                             <li {{menu_dhcp_lease}}>
@@ -366,6 +384,50 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
                 <a href="{% url 'app_delete' app.id %}" class="btn btn-danger">Yes</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% for domain in domain_list %}
+<div class="modal fade" id="delete-domain-{{ domain.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">{{ domain.name }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">Are you sure to delete this domain ?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                <a href="{% url 'domain_delete' domain.id %}" class="btn btn-danger">Yes</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% for subdomain in subdomain_list %}
+<div class="modal fade" id="delete-subdomain-{{ subdomain.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">{{ subdomain.name }}.{{subdomain.root_domain}}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">Are you sure to delete this subdomain ?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                <a href="{% url 'subdomain_delete' subdomain.id %}" class="btn btn-danger">Yes</a>
             </div>
         </div>
     </div>

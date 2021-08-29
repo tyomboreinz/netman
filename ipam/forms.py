@@ -92,6 +92,32 @@ class FormOS(ModelForm):
             'name': forms.TextInput({'class':'form-control', 'placeholder':'Press Enter to add OS'}),
         }
 
+class FormDomain(ModelForm):
+    class Meta:
+        model = Domain
+        fields = '__all__'
+
+        widgets = {
+            'name': forms.TextInput({'class':'form-control'}),
+            'ip': forms.Select({'class':'form-control'}),
+            'description': forms.TextInput({'class':'form-control'}),
+        }
+
+class FormSubDomain(ModelForm):
+    class Meta:
+        model = SubDomain
+        fields = '__all__'
+        list_choices = (
+            ('A', 'A'),)
+
+        widgets = {
+            'name': forms.TextInput({'class':'form-control'}),
+            'type': forms.Select(choices=list_choices,attrs={'class':'form-control'}),
+            'root_domain': forms.Select({'class':'form-control'}),
+            'ip': forms.Select({'class':'form-control'}),
+            'description': forms.TextInput({'class':'form-control'}),
+        }
+        
 class LoginForm(AuthenticationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'Enter Username Here ...'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control', 'placeholder':'Enter Password Here ...'}))

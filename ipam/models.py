@@ -57,7 +57,25 @@ class Application(models.Model):
 
 class ConfigPortal(models.Model):
     config = models.CharField(max_length=25)
-    value = models.CharField(max_length=70)
+    value = models.TextField()
 
     def __str__(self):
         return self.value
+
+class Domain(models.Model):
+    name = models.CharField(max_length=50)
+    ip = models.ForeignKey(Ip_address, on_delete=models.SET_NULL, null=True)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.name
+
+class SubDomain(models.Model):
+    name = models.CharField(max_length=50)
+    type = models.CharField(max_length=5)
+    root_domain = models.ForeignKey(Domain, on_delete=models.CASCADE)
+    ip = models.ForeignKey(Ip_address, on_delete=models.SET_NULL, null=True)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.name+'.'+str(self.root_domain)

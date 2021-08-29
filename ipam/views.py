@@ -1,3 +1,4 @@
+from django.db.models.aggregates import Count
 from django.db.models.functions.text import Upper
 from ipam.network import Network
 from django.shortcuts import render, redirect
@@ -7,6 +8,120 @@ from django.conf import settings
 from ipam.models import *
 from ipam.forms import *
 import datetime, random
+
+@login_required(login_url=settings.LOGIN_URL)
+def subdomain_apply(request, id_domain):
+    domain = Domain.objects.get(id=id_domain)
+    subdomain = SubDomain.objects.filter(root_domain=id_domain)
+    Network.dns_file_config(domain.id, domain.name, domain.ip, subdomain)
+    return redirect('/domain/'+ str(id_domain))
+
+@login_required(login_url=settings.LOGIN_URL)
+def subdomain_delete(request, id_subdomain):
+    subdomain = SubDomain.objects.get(id=id_subdomain)
+    subdomain.delete()
+    return redirect('/domain/'+ str(subdomain.root_domain_id))
+
+@login_required(login_url=settings.LOGIN_URL)
+def subdomain_edit(request, id_subdomain):
+    subdomain = SubDomain.objects.get(id=id_subdomain)
+    if request.POST:
+        form = FormSubDomain(request.POST, instance=subdomain)
+        if form.is_valid():
+            domain = Domain.objects.get(name=form.cleaned_data['root_domain'])
+            form.save()
+            return redirect('/domain/'+str(domain.id))
+    else:
+        form = FormSubDomain(instance=subdomain)
+        data = {
+            'form' : form,
+            'title' : 'Edit Subdomain',
+            'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+            'sidebar_domains' : Domain.objects.all().order_by('name'),
+        }
+    return render(request, 'item-edit.html', data)
+
+@login_required(login_url=settings.LOGIN_URL)
+def subdomain_add(request):
+    if request.POST:
+        form = FormSubDomain(request.POST)
+        if form.is_valid():
+            domain = Domain.objects.get(name=form.cleaned_data['root_domain'])
+            form.save()
+            return redirect('/domain/'+str(domain.id))
+    else:
+        form = FormSubDomain()
+        data = {
+            'form' : form,
+            'title' : 'Add SubDomain',
+            'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+            'sidebar_domains' : Domain.objects.all().order_by('name'),
+        }
+    return render(request, 'item-add.html', data)
+
+@login_required(login_url=settings.LOGIN_URL)
+def subdomain(request, id_subdomain):
+    data = {
+        'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+        'sidebar_domains' : Domain.objects.all().order_by('name'),
+        'subdomain_list' : SubDomain.objects.filter(root_domain=id_subdomain),
+        'domain' : Domain.objects.get(id=id_subdomain),
+    }
+    return render(request, 'subdomain.html', data)
+
+@login_required(login_url=settings.LOGIN_URL)
+def domain_delete(request, id_domain):
+    domain = Domain.objects.get(id=id_domain)
+    Network.dns_delete(domain.name)
+    domain.delete()
+    return redirect('/domain')
+
+@login_required(login_url=settings.LOGIN_URL)
+def domain_edit(request, id_domain):
+    domain = Domain.objects.get(id=id_domain)
+    if request.POST:
+        form = FormDomain(request.POST, instance=domain)
+        if form.is_valid():
+            form.save()
+            return redirect('/domain')
+    else:
+        form = FormDomain(instance=domain)
+        data = {
+            'form' : form,
+            'title' : 'Edit Domain',
+            'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+            'sidebar_domains' : Domain.objects.all().order_by('name'),
+        }
+    return render(request, 'item-edit.html', data)
+
+@login_required(login_url=settings.LOGIN_URL)
+def domain_add(request):
+    domain = Domain.objects.all().order_by('name')
+    if request.POST:
+        form = FormDomain(request.POST)
+        if form.is_valid():
+            form.save()
+            Network.dns_config(domain)
+            return redirect('/domain')
+    else:
+        form = FormDomain()
+        data = {
+            'form' : form,
+            'title' : 'Add Domain',
+            'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+            'sidebar_domains' : domain,
+        }
+    return render(request, 'item-add.html', data)
+
+@login_required(login_url=settings.LOGIN_URL)
+def domain_list(request):
+    domain = Domain.objects.all().order_by('name')
+    data = {
+        'domain_list' : domain,
+        'sidebar_domains' : domain,
+        'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+    }
+    return render(request, 'domain.html', data)
 
 @login_required(login_url=settings.LOGIN_URL)
 def os_delete(request, id_os):
@@ -29,6 +144,7 @@ def setting_os(request):
             'os_data' : OS.objects.all().order_by('name'),
             'configs' : ConfigPortal.objects.all().order_by('config'),
             'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+            'sidebar_domains' : Domain.objects.all().order_by('name'),
             }
     return render(request, 'setting.html', data)
 
@@ -44,7 +160,9 @@ def config_edit(request, id_config):
         form = FormConfigs(instance=set)
         data = {
             'form' : form,
-            'title' : 'Edit Config Portal - ' + str(set.config).upper()
+            'title' : 'Edit Config Portal - ' + str(set.config).upper(),
+            'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+            'sidebar_domains' : Domain.objects.all().order_by('name'),
         }
     return render(request, 'item-edit.html', data)
 
@@ -72,6 +190,8 @@ def application_edit(request, id_app):
         data = {
             'form' : form,
             'title' : 'Edit App',
+            'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+            'sidebar_domains' : Domain.objects.all().order_by('name'),
         }
     return render(request, 'item-edit.html', data)
 
@@ -87,6 +207,8 @@ def application_add(request):
         data = {
             'form' : form,
             'title' : 'Add App',
+            'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+            'sidebar_domains' : Domain.objects.all().order_by('name'),
         }
     return render(request, 'item-add.html', data)
 
@@ -96,6 +218,7 @@ def applications(request):
         'app_list' : Application.objects.all(),
         'menu_app' : 'class=mm-active',
         'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+        'sidebar_domains' : Domain.objects.all().order_by('name'),
     }
     return render(request, 'applications.html', data)
 
@@ -106,6 +229,7 @@ def dhcp_lease(request):
         'menu_dhcp_lease' : 'class=mm-active',
         'menu_dhcp_client' : 'class=mm-active',
         'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+        'sidebar_domains' : Domain.objects.all().order_by('name'),
     }
     return render(request, 'dhcp-lease.html', data)
 
@@ -123,6 +247,8 @@ def dhcp_static_edit(request,id_static):
             'form' : form,
             'dhcp' : dhcp,
             'title' : 'Edit Static DHCP',
+            'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+            'sidebar_domains' : Domain.objects.all().order_by('name'),
         }
     return render(request, 'item-edit.html', data)
 
@@ -144,18 +270,20 @@ def dhcp_static_add(request):
         data = {
             'form' : form,
             'title' : 'Add DHCP',
+            'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+            'sidebar_domains' : Domain.objects.all().order_by('name'),
         }
     return render(request, 'item-add.html', data)
 
 @login_required(login_url=settings.LOGIN_URL)
 def dhcp_static_lease(request):
-
     dhcp_static = Dhcp_static.objects.all().order_by(Length('ip').asc(), 'ip')
     data = {
         'dhcp_static': dhcp_static,
         'menu_dhcp_lease' : 'class=mm-active',
         'menu_dhcp_static' : 'class=mm-active',
         'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+        'sidebar_domains' : Domain.objects.all().order_by('name'),
     }
     return render(request, 'dhcp-static-lease.html', data)
 
@@ -192,6 +320,8 @@ def dhcp_config_edit(request,id_setting):
             'form' : form,
             'dhcp' : dhcp,
             'title' : 'Edit Config DHCP - '+ dhcp.config,
+            'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+            'sidebar_domains' : Domain.objects.all().order_by('name'),
         }
     return render(request, 'item-edit.html', data)
 
@@ -202,6 +332,7 @@ def dhcp_config_list(request):
         'dhcp_config' : dhcp_config,
         'menu_dhcp' : 'class=mm-active',
         'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+        'sidebar_domains' : Domain.objects.all().order_by('name'),
     }
     return render(request, 'dhcp-config.html', data)
 
@@ -231,6 +362,8 @@ def ip_edit(request, id_ip):
             'form' : form,
             'ip' : ip,
             'title' : 'Edit IP Address',
+            'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+            'sidebar_domains' : Domain.objects.all().order_by('name'),
         }
     return render(request, 'item-edit.html', data)
 
@@ -247,6 +380,7 @@ def ip_add(request):
         data = {
             'form' : form,
             'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+            'sidebar_domains' : Domain.objects.all().order_by('name'),
             'title' : 'Add IP',
         }
     return render(request, 'item-add.html', data)
@@ -271,6 +405,7 @@ def network_edit(request, id_subnet):
             'form' : form,
             'subnet' : subnet,
             'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+            'sidebar_domains' : Domain.objects.all().order_by('name'),
             'title' : 'Edit Network',
         }
     return render(request, 'item-edit.html', data)
@@ -280,6 +415,7 @@ def network_detail(request, id_subnet):
     ips = Ip_address.objects.filter(subnet=id_subnet).order_by(Length('ip_address').asc(), 'ip_address')
     data = {
         'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+        'sidebar_domains' : Domain.objects.all().order_by('name'),
         'id_subnet' : id_subnet,
         'ips' : ips,
         'menu_network_detail' : 'class=mm-active',
@@ -299,6 +435,7 @@ def network_add(request):
         data = {
             'form' : form,
             'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+            'sidebar_domains' : Domain.objects.all().order_by('name'),
             'title' : 'Add Network',
             'menu_network_aria' : 'mm-collapse mm-show',
             'menu_network_add' : 'class=mm-active',
@@ -312,6 +449,7 @@ def network_list(request):
     data = {
         'subnets' : subnets,
         'sidebar_subnets' : subnets,
+        'sidebar_domains' : Domain.objects.all().order_by('name'),
         'menu_network_aria' : 'mm-collapse mm-show',
         'menu_network_list' : 'class=mm-active',
         'menu_network' : 'class=mm-active',
@@ -340,7 +478,7 @@ def network_scan(request, id_subnet):
 
 @login_required(login_url=settings.LOGIN_URL)
 def dashboard(request):
-    os = OS.objects.all().order_by('name')
+    os = OS.objects.all().annotate(count_os=Count('ip_address')).order_by('-count_os')
     total_ip = Ip_address.objects.all().count()
     total_subnet = Subnet.objects.all().count()
     color = ['primary', 'success', 'warning', 'danger']
@@ -356,6 +494,7 @@ def dashboard(request):
         'data_os' : data_os,
         'menu_dashboard' : 'class=mm-active',
         'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+        'sidebar_domains' : Domain.objects.all().order_by('name'),
     }
     return render(request, 'dashboard.html', data)
 

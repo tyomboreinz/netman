@@ -1,18 +1,22 @@
 # Netman
 
-IP Address Management and DHCP Server
+IP Address, DHCP Server, DNS, Portal App Management for Your Intranet
 
 ## Requirement
 
 Ubuntu / Debian
 
-Package **isc-dhcp-server** and **nmap** already installed
+Package **nmap**, **isc-dhcp-server**, **bind9** already installed
 
 Python 3.9.5
 
-Django 3.2.4
-
 ## Installation
+
+Install some requirement for Python using pip
+
+```bash
+pip install -r requirement.txt
+```
 
 Migrate model to database
 
@@ -44,3 +48,4 @@ python3 manage.py runserver 0.0.0.0:8080
 - IP Address Management
 - DHCP Server Management
 - DNS Management
+- Portal APP Management
