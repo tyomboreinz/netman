@@ -91,7 +91,7 @@ class Network():
         file_config.writelines(config)
         file_config.close()
 
-        x = subprocess.check_output("/etc/init.d/bind9 restart", shell=True, text=False)
+        x = subprocess.check_output("service bind9 restart", shell=True, text=False)
 
         return ''
 
@@ -114,7 +114,7 @@ class Network():
         file_config.writelines(config)
         file_config.close()
 
-        x = subprocess.check_output("/etc/init.d/bind9 restart", shell=True, text=False)
+        x = subprocess.check_output("service bind9 restart", shell=True, text=False)
 
         return ''
 
@@ -122,5 +122,5 @@ class Network():
         if os.path.isfile("/etc/bind/zones/"+domain+".db") is True: 
             os.remove("/etc/bind/zones/"+domain+".db")
 
-        x = subprocess.check_output("/etc/init.d/bind9 restart", shell=True, text=False)
+        x = subprocess.check_output("service bind9 restart", shell=True, text=False)
         return ''
