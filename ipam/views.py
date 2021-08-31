@@ -62,10 +62,13 @@ def subdomain_add(request):
 @login_required(login_url=settings.LOGIN_URL)
 def subdomain(request, id_subdomain):
     data = {
+        'menu_subdomain' : 'class=mm-active',
+        'menu_domain_' : 'class=mm-active',
         'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
         'sidebar_domains' : Domain.objects.all().order_by('name'),
         'subdomain_list' : SubDomain.objects.filter(root_domain=id_subdomain),
         'domain' : Domain.objects.get(id=id_subdomain),
+        'id_subdomain' : id_subdomain,
     }
     return render(request, 'subdomain.html', data)
 
@@ -103,6 +106,8 @@ def domain_add(request):
             form.save()
             Network.dns_config(domain)
             return redirect('/domain')
+        else:
+            return redirect('/domain')
     else:
         form = FormDomain()
         data = {
@@ -117,6 +122,7 @@ def domain_add(request):
 def domain_list(request):
     domain = Domain.objects.all().order_by('name')
     data = {
+        'menu_domain' : 'class=mm-active',
         'domain_list' : domain,
         'sidebar_domains' : domain,
         'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
@@ -440,9 +446,6 @@ def network_add(request):
             'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
             'sidebar_domains' : Domain.objects.all().order_by('name'),
             'title' : 'Add Network',
-            'menu_network_aria' : 'mm-collapse mm-show',
-            'menu_network_add' : 'class=mm-active',
-            'menu_network' : 'class=mm-active',
         }
     return render(request, 'item-add.html', data)
 
@@ -453,7 +456,6 @@ def network_list(request):
         'subnets' : subnets,
         'sidebar_subnets' : subnets,
         'sidebar_domains' : Domain.objects.all().order_by('name'),
-        'menu_network_aria' : 'mm-collapse mm-show',
         'menu_network_list' : 'class=mm-active',
         'menu_network' : 'class=mm-active',
     }
@@ -471,7 +473,7 @@ def network_scan(request, id_subnet):
             if ip == address.ip_address:
                 token += 1
 
-        if token == 0:    
+        if token == 0:
             Ip_address.objects.create(ip_address=str(ip),subnet_id=id_subnet)
             print("IP : "+ ip +" Addedd Successfully")
         else:
@@ -483,12 +485,17 @@ def network_scan(request, id_subnet):
 def dashboard(request):
     os = OS.objects.all().annotate(count_os=Count('ip_address')).order_by('-count_os')
     total_ip = Ip_address.objects.all().count()
-    color = ['primary', 'success', 'warning', 'danger']
+    color_list = ['#007bff', '#6610f2', '#6f42c1', '#e83e8c', '#dc3545', '#fd7e14', '#ffc107', '#28a745', '#20c997', '#17a2b8', '#6c757d', '#3f6ad8', '#6c757d', '#3ac47d', '#16aaff', '#f7b924', '#d92550', '#eee', '#343a40', '#444054', '#794c8a']
     data_os = []
     for data in os:
         count_data = Ip_address.objects.filter(os_id=data.id).count()
         if count_data != 0:
-            data_os.append({'name' : data.name, 'count' : count_data, 'percentage' : format(count_data / total_ip * 100, ".0f"), 'color' : random.choice(color)})
+            # data_os.append({'name' : data.name, 'count' : count_data, 'percentage' : format(count_data / total_ip * 100, ".0f"), 'color' : random.choice(color)})
+            data_os.append({'name' : data.name, 'count' : count_data, 'percentage' : format(count_data / total_ip * 100, ".0f")})
+    
+    color = random.sample(color_list, len(data_os))
+    for i in range(len(data_os)):
+        data_os[i]['color'] = color[i]
 
     data = {
         'total_subnet' : Subnet.objects.all().count(),
@@ -496,6 +503,7 @@ def dashboard(request):
         'total_domain' : Domain.objects.all().count(),
         'total_subdomain' : SubDomain.objects.all().count(),
         'total_app' : Application.objects.all().count(),
+        'total_dhcp_lease' : len(Network.get_dhcp_lease()),
         'data_os' : data_os,
         'menu_dashboard' : 'class=mm-active',
         'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),

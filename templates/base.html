@@ -11,13 +11,15 @@
     <title>Netman IPAM</title>
     <!-- Disable tap highlight on IE -->
     <meta name="msapplication-tap-highlight" content="no">
-
+    <script src="{% static 'scripts/jquery.min.js' %}"></script>
+    <script src="{% static 'scripts/Chart.bundle.min.js' %}"></script>
     <link href="{% static 'main.css' %}" rel="stylesheet">
     {% for ip in ips %}
     <style>
         #ip-password-{{ ip.id }}{ -webkit-text-security: disc; }
     </style>
     {% endfor %}
+    
 </head>
 
 <body>
@@ -173,7 +175,7 @@
                                     <i class="metismenu-icon pe-7s-edit"></i> List Domain
                                 </a>
                             </li>
-                            <li>
+                            <li {{ menu_domain_ }}>
                                 <a href="#">
                                     <i class="metismenu-icon pe-7s-global"></i> Avaiable Domain
                                     <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
@@ -181,7 +183,7 @@
                                 <ul>
                                     {% for domain in sidebar_domains %}
                                         <li>
-                                            <a href="{% url 'domain' domain.id%}">
+                                            <a href="{% url 'domain' domain.id%}" {% if id_subdomain == domain.id%} {{ menu_subdomain }} {% endif %}>
                                                 <i class="metismenu-icon"></i> {{ domain.name }}
                                             </a>
                                         </li>

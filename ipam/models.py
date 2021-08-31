@@ -63,7 +63,7 @@ class ConfigPortal(models.Model):
         return self.value
 
 class Domain(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
     ip = models.ForeignKey(Ip_address, on_delete=models.SET_NULL, null=True)
     description = models.TextField()
 
