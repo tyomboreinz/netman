@@ -1,4 +1,5 @@
 from django import forms
+from django.db.models import fields
 from django.forms import ModelForm
 from django.contrib.auth.forms import AuthenticationForm
 from ipam.models import *
@@ -30,8 +31,17 @@ class FormSubnet(ModelForm):
         model = Subnet
         fields = '__all__'
 
+        netmask = ()
+        for i in range(1, 31):
+            net = (str(i), str(i))
+            netmask += (net,)
+
+        labels = {
+            'ip_network' : "IP "
+        }
+
         widgets = {
-            'netmask': forms.NumberInput({'class':'form-control'}),
+            'netmask': forms.Select(choices=netmask,attrs={'class':'form-control'}),
             'ip_network': forms.TextInput({'class':'form-control input-mask-trigger','data-inputmask':"'alias':'ip'"}),
             'ip_broadcast': forms.TextInput({'class':'form-control input-mask-trigger','data-inputmask':"'alias':'ip'"}),
             'description': forms.TextInput({'class':'form-control'}),

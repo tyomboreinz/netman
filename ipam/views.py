@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from ipam.models import *
 from ipam.forms import *
-import datetime, random
+import datetime, random, ipcalc
 
 @login_required(login_url=settings.LOGIN_URL)
 def subdomain_apply(request, id_domain):
@@ -355,9 +355,7 @@ def ip_delete(request, id_ip):
 def ip_edit(request, id_ip):
     ip = Ip_address.objects.get(id=id_ip)
     if request.POST:
-        post_value = request.POST.copy()
-        post_value['subnet'] = ip.subnet
-        form = FormIpAddress(post_value, instance=ip)
+        form = FormIpAddress(request.POST, instance=ip)
         if form.is_valid():
             subnet = Subnet.objects.get(ip_network=form.cleaned_data['subnet'])
             form.save()
@@ -365,7 +363,7 @@ def ip_edit(request, id_ip):
     else:
         form = FormIpAddress(instance=ip)
         # form.fields['subnet'].widget = forms.TextInput({'class':'form-control'})
-        form.fields['subnet'].widget = forms.HiddenInput()
+        # form.fields['subnet'].widget = forms.HiddenInput()
         # form.fields['subnet'].disabled = True
         data = {
             'form' : form,
@@ -404,7 +402,11 @@ def network_delete(request, id_subnet):
 def network_edit(request, id_subnet):
     subnet = Subnet.objects.get(id=id_subnet)
     if request.POST:
-        form = FormSubnet(request.POST, instance=subnet)
+        post_value = request.POST.copy()
+        subnet_calc = ipcalc.Network(str(post_value['ip_network']+'/'+str(post_value['netmask'])))
+        post_value['ip_network'] = str(subnet_calc.network())
+        post_value['ip_broadcast'] = str(subnet_calc.broadcast())
+        form = FormSubnet(post_value, instance=subnet)
         if form.is_valid():
             form.save()
             return redirect('/network')
@@ -435,12 +437,17 @@ def network_detail(request, id_subnet):
 @login_required(login_url=settings.LOGIN_URL)
 def network_add(request):
     if request.POST:
-        form = FormSubnet(request.POST)
+        post_value = request.POST.copy()
+        subnet = ipcalc.Network(str(post_value['ip_network']+'/'+str(post_value['netmask'])))
+        post_value['ip_network'] = str(subnet.network())
+        post_value['ip_broadcast'] = str(subnet.broadcast())
+        form = FormSubnet(post_value)
         if form.is_valid():
             form.save()
             return redirect('/network/')
     else:
         form = FormSubnet()
+        form.fields['ip_broadcast'].widget = forms.HiddenInput()
         data = {
             'form' : form,
             'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
@@ -491,7 +498,7 @@ def dashboard(request):
         count_data = Ip_address.objects.filter(os_id=data.id).count()
         if count_data != 0:
             # data_os.append({'name' : data.name, 'count' : count_data, 'percentage' : format(count_data / total_ip * 100, ".0f"), 'color' : random.choice(color)})
-            data_os.append({'name' : data.name, 'count' : count_data, 'percentage' : format(count_data / total_ip * 100, ".0f")})
+            data_os.append({'name' : data.name, 'count' : count_data})
     
     color = random.sample(color_list, len(data_os))
     for i in range(len(data_os)):

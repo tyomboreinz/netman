@@ -7,8 +7,8 @@ class OS(models.Model):
         return self.name
 
 class Subnet(models.Model):
-    netmask = models.CharField(max_length=15)
     ip_network = models.CharField(max_length=15)
+    netmask = models.CharField(max_length=15)
     ip_broadcast = models.CharField(max_length=15)
     description = models.TextField()
 
