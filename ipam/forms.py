@@ -3,6 +3,7 @@ from django.db.models import fields
 from django.forms import ModelForm
 from django.contrib.auth.forms import AuthenticationForm
 from ipam.models import *
+from ipam.network import Network
 
 class FormIpAddress(ModelForm):
     class Meta:
@@ -32,7 +33,7 @@ class FormSubnet(ModelForm):
         fields = '__all__'
 
         netmask = ()
-        for i in range(1, 31):
+        for i in range(16, 31):
             net = (str(i), str(i))
             netmask += (net,)
 
@@ -50,11 +51,24 @@ class FormSubnet(ModelForm):
 class FormDHCP(ModelForm):
     class Meta:
         model = Dhcp_Config
-        fields = ['value']
+        fields = '__all__'
+
+        netmask = ()
+        for i in range(16, 31):
+            net = (str(i), str(i))
+            netmask += (net,)
 
         widgets = {
-            'config': forms.TextInput({'class':'form-control'}),
-            'value': forms.TextInput({'class':'form-control'}),
+            'name': forms.TextInput({'class':'form-control'}),
+            'network': forms.TextInput({'class':'form-control'}),
+            'netmask': forms.Select(choices=netmask,attrs={'class':'form-control'}),
+            'broadcast': forms.HiddenInput(),
+            'ip_start': forms.TextInput({'class':'form-control'}),
+            'ip_end': forms.TextInput({'class':'form-control'}),
+            'gateway': forms.TextInput({'class':'form-control'}),
+            'dns1': forms.TextInput({'class':'form-control'}),
+            'dns2': forms.TextInput({'class':'form-control'}),
+            'interface': forms.Select({'class':'form-control'})
         }
 
 class FormDHCP_Static(ModelForm):

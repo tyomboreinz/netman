@@ -28,11 +28,20 @@ class Ip_address(models.Model):
         return self.ip_address
 
 class Dhcp_Config(models.Model):
-    config = models.CharField(max_length=20)
-    value = models.CharField(max_length=20)
+
+    name = models.CharField(max_length=30)
+    network = models.CharField(max_length=15)
+    netmask = models.CharField(max_length=15)
+    broadcast = models.CharField(max_length=15)
+    ip_start = models.CharField(max_length=15)
+    ip_end = models.CharField(max_length=15)
+    gateway = models.CharField(max_length=15)
+    dns1 = models.CharField(max_length=15)
+    dns2 = models.CharField(max_length=15)
+    interface = models.CharField(max_length=8)
 
     def __str__(self):
-        return self.config
+        return self.name
 
 class Dhcp_static(models.Model):
     name = models.CharField(max_length=20)

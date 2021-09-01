@@ -1,5 +1,4 @@
 from django.db.models.aggregates import Count
-from django.db.models.functions.text import Upper
 from ipam.network import Network
 from django.shortcuts import render, redirect
 from django.db.models.functions import Length
@@ -295,22 +294,11 @@ def dhcp_static_lease(request):
 
 @login_required(login_url=settings.LOGIN_URL)
 def dhcp_config_apply(request):
-    default_lease_time = Dhcp_Config.objects.get(config="default_lease_time")
-    max_lease_time = Dhcp_Config.objects.get(config="max_lease_time")
-    subnet = Dhcp_Config.objects.get(config="subnet")
-    netmask = Dhcp_Config.objects.get(config="netmask")
-    dhcp_start = Dhcp_Config.objects.get(config="dhcp_start")
-    dhcp_end = Dhcp_Config.objects.get(config="dhcp_end")
-    gateway = Dhcp_Config.objects.get(config="gateway")
-    dns1 = Dhcp_Config.objects.get(config="dns1")
-    dns2 = Dhcp_Config.objects.get(config="dns2")
-    domain = Dhcp_Config.objects.get(config="domain")
-    interface = Dhcp_Config.objects.get(config="interface")
+    dhcp_config = Dhcp_Config.objects.all()
     static_leases = Dhcp_static.objects.all().order_by(Length('ip').asc(), 'ip')
+    Network.dhcp_config(dhcp_config, static_leases)
 
-    Network.dhcp_config(default_lease_time.value, max_lease_time.value, subnet.value, netmask.value, dhcp_start.value, dhcp_end.value, gateway.value, dns1.value, dns2.value, domain.value, interface.value, static_leases)
-
-    return redirect('/')
+    return redirect('/dhcp/config')
 
 @login_required(login_url=settings.LOGIN_URL)
 def dhcp_config_edit(request,id_setting):
@@ -322,17 +310,39 @@ def dhcp_config_edit(request,id_setting):
             return redirect('/dhcp/config')
     else:
         form = FormDHCP(instance=dhcp)
-        if dhcp.config == "interface":
-            form.fields['value'].widget = forms.Select(choices=Network.get_interface_list(),attrs={'class':'form-control'})
+        form.fields['interface'].widget = forms.Select(choices=((str(dhcp.interface),str(dhcp.interface)),),attrs={'class':'form-control'})
             
         data = {
             'form' : form,
-            'dhcp' : dhcp,
-            'title' : 'Edit Config DHCP - '+ dhcp.config,
+            'title' : 'Edit Config DHCP',
             'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
             'sidebar_domains' : Domain.objects.all().order_by('name'),
         }
     return render(request, 'item-edit.html', data)
+
+@login_required(login_url=settings.LOGIN_URL)
+def dhcp_config_add(request):
+    if request.POST:
+        post_value = request.POST.copy()
+        subnet = ipcalc.Network(str(post_value['network']+'/'+str(post_value['netmask'])))
+        post_value['network'] = str(subnet.network())
+        post_value['netmask'] = str(subnet.netmask())
+        post_value['broadcast'] = str(subnet.broadcast())
+        form = FormDHCP(post_value)
+        if form.is_valid():
+            form.save()
+            return redirect('/dhcp/config')
+    else:
+        interface = Network.get_interface_dhcp(Dhcp_Config.objects.values('interface'))
+        form = FormDHCP()
+        form.fields['interface'].widget = forms.Select(choices=interface,attrs={'class':'form-control'})
+        data = {
+            'form' : form,
+            'title' : 'Add DHCP Server',
+            'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
+            'sidebar_domains' : Domain.objects.all().order_by('name'),
+        }
+    return render(request, 'item-add.html', data)
 
 @login_required(login_url=settings.LOGIN_URL)
 def dhcp_config_list(request):
@@ -362,9 +372,6 @@ def ip_edit(request, id_ip):
             return redirect('/network/' + str(subnet.id))
     else:
         form = FormIpAddress(instance=ip)
-        # form.fields['subnet'].widget = forms.TextInput({'class':'form-control'})
-        # form.fields['subnet'].widget = forms.HiddenInput()
-        # form.fields['subnet'].disabled = True
         data = {
             'form' : form,
             'ip' : ip,
@@ -510,6 +517,7 @@ def dashboard(request):
         'total_domain' : Domain.objects.all().count(),
         'total_subdomain' : SubDomain.objects.all().count(),
         'total_app' : Application.objects.all().count(),
+        'total_dhcp_server' : Dhcp_Config.objects.all().count(),
         'total_dhcp_lease' : len(Network.get_dhcp_lease()),
         'data_os' : data_os,
         'menu_dashboard' : 'class=mm-active',

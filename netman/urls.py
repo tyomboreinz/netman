@@ -15,6 +15,7 @@ urlpatterns = [
     path('dhcp/config', dhcp_config_list, name='dhcp_config_list'),
     path('dhcp/config/<int:id_setting>', dhcp_config_edit, name='dhcp_config_edit'),
     path('dhcp/config/apply', dhcp_config_apply, name='dhcp_config_apply'),
+    path('dhcp/add', dhcp_config_add, name='dhcp_config_add'),
     path('dhcp/lease/', dhcp_lease, name='dhcp_lease'),
     path('dhcp/static/', dhcp_static_lease, name='dhcp_static_lease'),
     path('dhcp/static/add', dhcp_static_add, name='dhcp_static_add'),

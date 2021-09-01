@@ -2,14 +2,21 @@ import subprocess, os
 
 class Network():
 
-    def get_interface_list():
+    def get_interface_dhcp(interface_db):
         x = subprocess.check_output("ifconfig | grep UP | grep -v br | grep -v docker | grep -v lo | awk '{print $1}' | tr -d ':'", shell=True)
         x_decode = x.decode("utf-8")
         interface_list = list(filter(None,(x_decode.split("\n"))))
         interface = ()
         for iface in interface_list:
-            ether = (iface, iface)
-            interface += (ether,)
+            token = 0
+
+            for ifacedb in interface_db:
+                if iface == ifacedb['interface']:
+                    token += 1
+            
+            if token == 0:
+                ether = (iface, iface)
+                interface += (ether,)
         return interface
 
     def get_dhcp_lease():
@@ -32,38 +39,47 @@ class Network():
         lists_ip = list(filter(None,(x_decode.split("\n"))))
         return lists_ip
 
-    def dhcp_config(default_lease_time, max_lease_time, subnet, netmask, dhcp_start, dhcp_end, gateway, dns1, dns2, domain, interface, static_leases):
-        config_interface = "INTERFACESv4=\""+ interface +"\""
-        config = [
-            "default-lease-time "+ default_lease_time +";\n",
-            "max-lease-time "+ max_lease_time + ";\n",
-            "authoritative;\n\n",
-            "subnet "+ subnet +" netmask "+ netmask +"  {\n",
-            "\trange "+ dhcp_start +" "+ dhcp_end +";\n",
-            "\toption routers "+ gateway +";\n",
-            "\toption domain-name-servers "+ dns1 +", "+ dns2 +";\n",
-            "\toption domain-name \""+ domain +"\";\n",
-            "}\n\n#static_lease\n\n"
-        ]
+    # def dhcp_config(default_lease_time, max_lease_time, subnet, netmask, dhcp_start, dhcp_end, gateway, dns1, dns2, domain, interface, static_leases):
+    def dhcp_config(dhcp_config, static_leases):
+        config = ''
+        interface = ''
+        config_interface = ''
 
-        for static in static_leases:
-            config += [
-                "host "+ static.name +"{\n",
-                "\thardware ethernet "+ static.mac +";\n",
-                "\tfixed-address "+ static.ip +";\n}\n"
-            ]
+        if dhcp_config.count() != 0:
+            config += "default-lease-time 600;\nmax-lease-time 7200;\nauthoritative;\n\n"
 
-        file_config = open(r"/etc/dhcp/dhcpd.conf","w+")
-        file_config.truncate(0)
-        file_config.writelines(config)
-        file_config.close()
+            for dhcp in dhcp_config:
+                interface += dhcp.interface+" "
 
-        file_config = open(r"/etc/default/isc-dhcp-server.conf","w+")
-        file_config.truncate(0)
-        file_config.writelines(config_interface)
-        file_config.close()
+                config += "subnet "+ dhcp.network +" netmask "+ dhcp.netmask +"  {\n"
+                config += "\trange "+ dhcp.ip_start +" "+ dhcp.ip_end +";\n"
+                config += "\toption routers "+ dhcp.gateway +";\n"
+                config += "\toption broadcast-address "+ dhcp.broadcast +";\n"
+                config += "\toption domain-name-servers "+ dhcp.dns1 +", "+ dhcp.dns2 +";\n"
+                config += "\toption domain-name \"coba.com\";\n\n"
+            
+            config += "}\n\n#static_lease\n\n"
 
-        x = subprocess.check_output("/etc/init.d/isc-dhcp-server restart", shell=True, text=False)
+            for static in static_leases:
+                config += "host "+ str(static.name) +"{\n"
+                config += "\thardware ethernet "+ str(static.mac) +";\n"
+                config +=  "\tfixed-address "+ str(static.ip) +";\n}\n"
+
+            config_interface = "INTERFACESv4=\""+ interface +"\""
+
+        print(config)
+        print(config_interface)
+        # file_config = open(r"/etc/dhcp/dhcpd.conf","w+")
+        # file_config.truncate(0)
+        # file_config.writelines(config)
+        # file_config.close()
+
+        # file_config = open(r"/etc/default/isc-dhcp-server.conf","w+")
+        # file_config.truncate(0)
+        # file_config.writelines(config_interface)
+        # file_config.close()
+
+        # x = subprocess.check_output("/etc/init.d/isc-dhcp-server restart", shell=True, text=False)
         # sed -e '/host/,/^/d' | sed -e '/hardware/,/^/d' | sed -e '/fixed/,/^/d' #delete line contain word
 
         return ''
