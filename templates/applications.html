@@ -34,7 +34,8 @@
                         <th class="text-center">#</th>
                         <th class="text-center">Image</th>
                         <th class="text-center">Name</th>
-                        <th class="text-center">Link</th>
+                        <th class="text-center">IP</th>
+                        <th class="text-center">Domain</th>
                         <th class="text-center">Description</th>
                         <th class="text-center">Actions</th>
                     </tr>
@@ -46,6 +47,7 @@
                         <td class="text-center"><img src="{{ app.image.url }}" height="60px"></td>
                         <td class="text-center">{{ app.name }}</td>
                         <td class="text-center"><a href="{{app.protocol}}://{{ app.ip }}:{{ app.port }}" target="_blank">{{app.protocol}}://{{ app.ip }}:{{ app.port }}</a></td>
+                        <td class="text-center"><a href="{{app.protocol}}://{{ app.domain }}" target="_blank">{{app.protocol}}://{{ app.domain }}</a></td>
                         <td class="text-center">{{ app.description }}</td>
                         <td class="text-center">
                             <a href="{% url 'app_edit' app.id %}" class="btn btn-primary btn-sm">Edit</a>

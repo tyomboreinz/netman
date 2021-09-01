@@ -96,6 +96,7 @@ class FormApplication(ModelForm):
             'protocol': forms.Select(choices=list_choices,attrs={'class':'form-control'}),
             'port': forms.TextInput({'class':'form-control'}),
             'ip': forms.Select({'class':'form-control'}),
+            'domain': forms.Select({'class':'form-control'}),
             'description': forms.TextInput({'class':'form-control'}),
         }
 

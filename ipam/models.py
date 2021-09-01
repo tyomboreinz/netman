@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.base import Model
 
 class OS(models.Model):
     name = models.CharField(max_length=20)
@@ -52,18 +53,6 @@ class Dhcp_static(models.Model):
     def __str__(self):
         return self.name
 
-class Application(models.Model):
-    name = models.CharField(max_length=20)
-    protocol = models.CharField(max_length=5)
-    ip = models.ForeignKey(Ip_address, on_delete=models.CASCADE)
-    port = models.IntegerField()
-    description = models.TextField()
-    image = models.ImageField(upload_to='app/', null=True)
-    create_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.name
-
 class ConfigPortal(models.Model):
     config = models.CharField(max_length=25)
     value = models.TextField()
@@ -88,3 +77,17 @@ class SubDomain(models.Model):
 
     def __str__(self):
         return self.name+'.'+str(self.root_domain)
+
+
+class Application(models.Model):
+    name = models.CharField(max_length=20)
+    protocol = models.CharField(max_length=5)
+    ip = models.ForeignKey(Ip_address, on_delete=models.CASCADE)
+    port = models.IntegerField()
+    domain = models.ForeignKey(SubDomain, on_delete=models.SET_NULL, null=True)
+    description = models.TextField()
+    image = models.ImageField(upload_to='app/', null=True)
+    create_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name

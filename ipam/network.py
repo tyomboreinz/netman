@@ -39,7 +39,6 @@ class Network():
         lists_ip = list(filter(None,(x_decode.split("\n"))))
         return lists_ip
 
-    # def dhcp_config(default_lease_time, max_lease_time, subnet, netmask, dhcp_start, dhcp_end, gateway, dns1, dns2, domain, interface, static_leases):
     def dhcp_config(dhcp_config, static_leases):
         config = ''
         interface = ''
@@ -67,19 +66,17 @@ class Network():
 
             config_interface = "INTERFACESv4=\""+ interface +"\""
 
-        print(config)
-        print(config_interface)
-        # file_config = open(r"/etc/dhcp/dhcpd.conf","w+")
-        # file_config.truncate(0)
-        # file_config.writelines(config)
-        # file_config.close()
+        file_config = open(r"/etc/dhcp/dhcpd.conf","w+")
+        file_config.truncate(0)
+        file_config.writelines(config)
+        file_config.close()
 
-        # file_config = open(r"/etc/default/isc-dhcp-server.conf","w+")
-        # file_config.truncate(0)
-        # file_config.writelines(config_interface)
-        # file_config.close()
+        file_config = open(r"/etc/default/isc-dhcp-server.conf","w+")
+        file_config.truncate(0)
+        file_config.writelines(config_interface)
+        file_config.close()
 
-        # x = subprocess.check_output("/etc/init.d/isc-dhcp-server restart", shell=True, text=False)
+        x = subprocess.check_output("/etc/init.d/isc-dhcp-server restart", shell=True, text=False)
         # sed -e '/host/,/^/d' | sed -e '/hardware/,/^/d' | sed -e '/fixed/,/^/d' #delete line contain word
 
         return ''

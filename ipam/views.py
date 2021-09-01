@@ -504,7 +504,6 @@ def dashboard(request):
     for data in os:
         count_data = Ip_address.objects.filter(os_id=data.id).count()
         if count_data != 0:
-            # data_os.append({'name' : data.name, 'count' : count_data, 'percentage' : format(count_data / total_ip * 100, ".0f"), 'color' : random.choice(color)})
             data_os.append({'name' : data.name, 'count' : count_data})
     
     color = random.sample(color_list, len(data_os))
