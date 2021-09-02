@@ -227,20 +227,6 @@
     
     <script type="text/javascript" src="{% static 'scripts/main.js' %}"></script>
 
-    {% for ip in ips %}
-    <script type="text/javascript">
-        document.getElementById('password-{{ ip.id }}').onclick = function () {
-            document.getElementById('password-{{ ip.id }}').classList.toggle("fa-eye-slash");
-            var text = document.getElementById('ip-password-{{ ip.id }}');
-            if (text.style.webkitTextSecurity == "none") {
-                text.style.webkitTextSecurity = "disc";
-            } else {
-                text.style.webkitTextSecurity = "none";
-            }
-        }
-    </script>
-    {% endfor %}
-
 </body>
 
 </html>
@@ -298,29 +284,50 @@
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    document.getElementById('password-{{ ip.id }}').onclick = function () {
+        document.getElementById('password-{{ ip.id }}').classList.toggle("fa-eye-slash");
+        var text = document.getElementById('ip-password-{{ ip.id }}');
+        if (text.style.webkitTextSecurity == "none") {
+            text.style.webkitTextSecurity = "disc";
+        } else {
+            text.style.webkitTextSecurity = "none";
+        }
+    }
+</script>
+
 {% endfor %}
 
 {% for subnet in subnets %}
-<div class="modal fade" id="scan-network-{{ subnet.id }}" tabindex="-1" role="dialog"
-    aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="scan-network-{{ subnet.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">{{ subnet.ip_network }} - {{ subnet.description }}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <div id="title-network-{{ subnet.id }}"></div>
+                <h5 class="modal-title" id="title-text-{{ subnet.id }}"><span>{{ subnet.ip_network }} - {{ subnet.description }}</span></h5>
+                <div></div>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" id="body-network-{{ subnet.id }}">
                 <p class="mb-0">Are you sure to scan ip address on network {{ subnet.ip_network }} / {{ subnet.netmask }} ?</p>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer" id="footer-network-{{ subnet.id }}">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
-                <a href="{% url 'network_scan' subnet.id %}" class="btn btn-danger">Yes</a>
+                <a href="{% url 'network_scan' subnet.id %}" class="btn btn-danger" id="scan-{{subnet.id}}">Yes</a>
             </div>
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    document.getElementById('scan-{{subnet.id}}').onclick = function () {
+        document.getElementById('footer-network-{{ subnet.id }}').remove();
+        document.getElementById('body-network-{{ subnet.id }}').remove();
+        document.getElementById('title-network-{{ subnet.id }}').classList.toggle("spinner-border");
+        document.getElementById('title-text-{{ subnet.id }}').getElementsByTagName('span')[0].textContent = "Scanning {{ subnet.ip_network }} / {{ subnet.netmask }}, Please Wait ..."
+    }
+</script>
+
 {% endfor %}
 
 {% for subnet in subnets %}

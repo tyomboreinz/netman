@@ -84,7 +84,7 @@ class Application(models.Model):
     protocol = models.CharField(max_length=5)
     ip = models.ForeignKey(Ip_address, on_delete=models.CASCADE)
     port = models.IntegerField()
-    domain = models.ForeignKey(SubDomain, on_delete=models.SET_NULL, null=True)
+    domain = models.CharField(max_length=50, null=True)
     description = models.TextField()
     image = models.ImageField(upload_to='app/', null=True)
     create_at = models.DateTimeField(auto_now_add=True)
