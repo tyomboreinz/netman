@@ -1,4 +1,5 @@
-import subprocess, os
+import subprocess, os, wget
+from os import path
 
 class Network():
 
@@ -40,6 +41,10 @@ class Network():
         return lists_ip
 
     def dhcp_config(dhcp_config, static_leases):
+
+        if path.exists("/usr/local/etc/oui.txt") is False:
+            wget.download("http://standards-oui.ieee.org/oui/oui.txt", "/usr/local/etc/oui.txt")
+
         config = ''
         interface = ''
         config_interface = ''
@@ -113,6 +118,10 @@ class Network():
         return ''
 
     def dns_config(domains):
+
+        if path.exists("/etc/bind/zones") is False:
+            os.mkdir("/etc/bind/zones")
+
         config = '# Config File for bind9\n\n'
         for domain in domains:
             config += "zone \""+domain.name+"\" {\n"
@@ -136,6 +145,7 @@ class Network():
         return ''
 
     def dns_delete(domain):
+
         if os.path.isfile("/etc/bind/zones/"+domain+".db") is True: 
             os.remove("/etc/bind/zones/"+domain+".db")
 

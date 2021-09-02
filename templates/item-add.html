@@ -9,22 +9,8 @@
                 <i class="pe-7s-medal icon-gradient bg-tempting-azure"></i>
             </div>
             <div>
-                {% if title == 'Add Network' %}
-                    Add Network
-                    <div class="page-title-subheading">Adding Network to more connect with other</div>
-                {% elif title == 'Add IP' %}
-                    Add IP Address
-                    <div class="page-title-subheading">Adding IP Address to manage</div>
-                {% elif title == 'Add DHCP' %}
-                    Add DHCP Static
-                    <div class="page-title-subheading">Adding DHCP Static Lease</div>
-                {% elif title == 'Add DHCP Server' %}
-                    Add DHCP Server
-                    <div class="page-title-subheading">Adding DHCP Server</div>
-                {% elif title == 'Add App' %}
-                    Add Aplications
-                    <div class="page-title-subheading">Adding Applications</div>
-                {% endif %}
+                {{ title }}
+                <div class="page-title-subheading">{{ subtitle }}</div>
             </div>
         </div>
     </div>

@@ -9,22 +9,15 @@ class FormIpAddress(ModelForm):
     class Meta:
         model = Ip_address
         fields = '__all__'
-        list_choices = (
-            ('Mikrotik', 'Mikrotik'),
-            ('Ubuntu Server 20.04', 'Ubuntu Server 20.04'),
-            ('Ubuntu Desktop', 'Ubuntu Desktop'),
-            ('Windows 8', 'Windows 8'),
-            ('Windows 10', 'Windows 10'), )
 
         widgets = {
             'ip_address': forms.TextInput({'class':'form-control input-mask-trigger','data-inputmask':"'alias':'ip'"}),
             'hostname': forms.TextInput({'class':'form-control'}),
             'description': forms.TextInput({'class':'form-control'}),
             'subnet': forms.Select({'class':'form-control'}),
-            'os': forms.Select(choices=list_choices,attrs={'class':'form-control'}),
+            'os': forms.Select({'class':'form-control'}),
             'username': forms.TextInput({'class':'form-control'}),
             'password': forms.TextInput({'class':'form-control','data-toggle':'password'}),
-            # 'password': forms.PasswordInput({'class':'form-control','data-toggle':'password'}),
         }
 
 class FormSubnet(ModelForm):
@@ -60,14 +53,14 @@ class FormDHCP(ModelForm):
 
         widgets = {
             'name': forms.TextInput({'class':'form-control'}),
-            'network': forms.TextInput({'class':'form-control'}),
+            'network': forms.TextInput({'class':'form-control input-mask-trigger','data-inputmask':"'alias':'ip'"}),
             'netmask': forms.Select(choices=netmask,attrs={'class':'form-control'}),
             'broadcast': forms.HiddenInput(),
-            'ip_start': forms.TextInput({'class':'form-control'}),
-            'ip_end': forms.TextInput({'class':'form-control'}),
-            'gateway': forms.TextInput({'class':'form-control'}),
-            'dns1': forms.TextInput({'class':'form-control'}),
-            'dns2': forms.TextInput({'class':'form-control'}),
+            'ip_start': forms.TextInput({'class':'form-control input-mask-trigger','data-inputmask':"'alias':'ip'"}),
+            'ip_end': forms.TextInput({'class':'form-control input-mask-trigger','data-inputmask':"'alias':'ip'"}),
+            'gateway': forms.TextInput({'class':'form-control input-mask-trigger','data-inputmask':"'alias':'ip'"}),
+            'dns1': forms.TextInput({'class':'form-control input-mask-trigger','data-inputmask':"'alias':'ip'"}),
+            'dns2': forms.TextInput({'class':'form-control input-mask-trigger','data-inputmask':"'alias':'ip'"}),
             'interface': forms.Select({'class':'form-control'})
         }
 
@@ -132,12 +125,13 @@ class FormSubDomain(ModelForm):
     class Meta:
         model = SubDomain
         fields = '__all__'
-        list_choices = (
-            ('A', 'A'),)
+        # list_choices = (
+        #     ('A', 'A'),)
 
         widgets = {
             'name': forms.TextInput({'class':'form-control'}),
-            'type': forms.Select(choices=list_choices,attrs={'class':'form-control'}),
+            # 'type': forms.Select(choices=list_choices,attrs={'class':'form-control'}),
+            'type' : forms.HiddenInput(),
             'root_domain': forms.Select({'class':'form-control'}),
             'ip': forms.Select({'class':'form-control'}),
             'description': forms.TextInput({'class':'form-control'}),

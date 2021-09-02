@@ -25,7 +25,9 @@ def subdomain_delete(request, id_subdomain):
 def subdomain_edit(request, id_subdomain):
     subdomain = SubDomain.objects.get(id=id_subdomain)
     if request.POST:
-        form = FormSubDomain(request.POST, instance=subdomain)
+        post_value = request.POST.copy()
+        post_value["type"] = 'A'
+        form = FormSubDomain(post_value, instance=subdomain)
         if form.is_valid():
             domain = Domain.objects.get(name=form.cleaned_data['root_domain'])
             form.save()
@@ -43,7 +45,9 @@ def subdomain_edit(request, id_subdomain):
 @login_required(login_url=settings.LOGIN_URL)
 def subdomain_add(request):
     if request.POST:
-        form = FormSubDomain(request.POST)
+        post_value = request.POST.copy()
+        post_value["type"] = 'A'
+        form = FormSubDomain(post_value)
         if form.is_valid():
             domain = Domain.objects.get(name=form.cleaned_data['root_domain'])
             form.save()
@@ -52,7 +56,8 @@ def subdomain_add(request):
         form = FormSubDomain()
         data = {
             'form' : form,
-            'title' : 'Add SubDomain',
+            'title' : 'Add Subdomain',
+            'subtitle' : 'Adding Subdomain Name',
             'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
             'sidebar_domains' : Domain.objects.all().order_by('name'),
         }
@@ -112,6 +117,7 @@ def domain_add(request):
         data = {
             'form' : form,
             'title' : 'Add Domain',
+            'subtitle' : 'Add Domain Name',
             'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
             'sidebar_domains' : domain,
         }
@@ -212,6 +218,7 @@ def application_add(request):
         data = {
             'form' : form,
             'title' : 'Add App',
+            'subtitle' : 'Adding Applications',
             'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
             'sidebar_domains' : Domain.objects.all().order_by('name'),
         }
@@ -275,6 +282,7 @@ def dhcp_static_add(request):
         data = {
             'form' : form,
             'title' : 'Add DHCP',
+            'subtitle' : 'Adding DHCP Static Lease',
             'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
             'sidebar_domains' : Domain.objects.all().order_by('name'),
         }
@@ -339,6 +347,7 @@ def dhcp_config_add(request):
         data = {
             'form' : form,
             'title' : 'Add DHCP Server',
+            'subtitle' : 'Adding DHCP Server',
             'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
             'sidebar_domains' : Domain.objects.all().order_by('name'),
         }
@@ -396,6 +405,7 @@ def ip_add(request):
             'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
             'sidebar_domains' : Domain.objects.all().order_by('name'),
             'title' : 'Add IP',
+            'subtile' : 'Adding IP Address to manage'
         }
     return render(request, 'item-add.html', data)
 
@@ -460,6 +470,7 @@ def network_add(request):
             'sidebar_subnets' : Subnet.objects.all().order_by(Length('ip_network').asc(), 'ip_network'),
             'sidebar_domains' : Domain.objects.all().order_by('name'),
             'title' : 'Add Network',
+            'subtitle' : 'Adding Network to more connect with other'
         }
     return render(request, 'item-add.html', data)
 

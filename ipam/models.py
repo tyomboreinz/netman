@@ -78,7 +78,6 @@ class SubDomain(models.Model):
     def __str__(self):
         return self.name+'.'+str(self.root_domain)
 
-
 class Application(models.Model):
     name = models.CharField(max_length=20)
     protocol = models.CharField(max_length=5)
