@@ -17,6 +17,11 @@
 </div>
 <div class="main-card mb-3 card">
     <div class="card-body">
+        {% for message in messages %}
+            {% if message %}
+                <div class="alert alert-danger">{{ message }}</div>
+            {% endif %}
+        {% endfor %}
         <form action="" method="post" enctype="multipart/form-data" class="form-horizontal form-material mx-2">
             {% csrf_token %}
             {{ form.as_p }}

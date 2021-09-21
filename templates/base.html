@@ -77,12 +77,18 @@
                                     </div>
                                 </div>
                                 <div class="widget-content-left  ml-3 header-user-info">
-                                    <div class="widget-heading">
-                                        {% if user.is_authenticated %}
-                                            {{ user }}
-                                        {% endif %}
-                                    </div>
-                                    <div class="widget-subheading"> -- </div>
+                                        <div class="widget-heading">
+                                            {% if user.is_authenticated %}
+                                                {{ user }}
+                                            {% endif %}
+                                        </div>
+                                        <div class="widget-subheading">
+                                            {% if user.is_staff == True %}
+                                                Admin
+                                            {% else %}
+                                                User
+                                            {% endif %}
+                                        </div>
                                 </div>
                                 <div class="widget-content-right header-user-info ml-3">
                                     <!-- <button type="button" class="btn-shadow p-1 btn btn-primary btn-sm show-toastr-example">
@@ -202,6 +208,7 @@
                             </li>
                             <li class="app-sidebar__heading">Setting</li>
                             <li {{ menu_config }}><a href="{% url 'setting' %}"><i class="metismenu-icon pe-7s-play"></i>Configuration</a></li>
+                            <li {{ menu_user }}><a href="{% url 'users' %}"><i class="metismenu-icon pe-7s-user"></i>Users</a></li>
                         </ul>
                     </div>
                 </div>
@@ -432,3 +439,35 @@
     </div>
 </div>
 {% endfor %}
+
+{% if user.is_staff == True %}
+    {% for user_l in list_user %}
+    <div class="modal fade" id="delete-user-{{ user_l.username }}" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        {% if user_l.first_name %}
+                            {{ user_l.first_name }} {{ user_l.last_name }}
+                        {% else %}
+                            {{ user_l.username }}
+                        {% endif %}
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">Are you sure to delete this user ?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                    <a href="{% url 'del_user' user_l.username %}" class="btn btn-danger">Yes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    
+{% endif %}

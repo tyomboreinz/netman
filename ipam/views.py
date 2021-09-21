@@ -1,12 +1,54 @@
 from django.db.models.aggregates import Count
+from django.contrib.auth.models import User
 from ipam.network import Network
 from django.shortcuts import render, redirect
 from django.db.models.functions import Length
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib import messages
 from django.conf import settings
 from ipam.models import *
 from ipam.forms import *
+from django.contrib.auth import get_user_model
 import datetime, random, ipcalc
+
+@staff_member_required(login_url=settings.LOGIN_URL)
+def del_user(request, username):
+    userdelete = User.objects.get(username=username)
+    userdelete.delete()
+    return redirect('/users/')
+
+@login_required(login_url=settings.LOGIN_URL)
+def list_user(request):
+    listuser = get_user_model().objects.exclude(username=request.user)
+    data = {
+        'menu_user' : 'class=mm-active',
+        'current_user' : request.user,
+        'list_user' : listuser,
+    }
+    
+    return render(request, 'list_user.html', data)
+
+@login_required(login_url=settings.LOGIN_URL)
+def signup(request):
+    if request.POST:
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('/users/')
+        else:
+            messages.error(request, "Check again your password !")
+            return redirect('/user/add')
+    else:
+        form = UserCreationForm()
+        data = {
+            'form' : form,
+            'title' : 'Add User',
+            'subtitle' : 'Add User to access this Application',
+        }
+    
+    return render(request,'item-add.html', data)
 
 @login_required(login_url=settings.LOGIN_URL)
 def subdomain_apply(request, id_domain):

@@ -7,6 +7,12 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
 
+    path('users/', list_user, name='users'),
+    path('user/add', signup, name='signup'),
+    path('user/delete/<str:username>', del_user, name='del_user'),
+    path('login/', LoginView.as_view(authentication_form=LoginForm), name='login'),
+    path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
+
     path('login/', LoginView.as_view(authentication_form=LoginForm), name='login'),
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
     path('dashboard', dashboard, name='dashboard'),
